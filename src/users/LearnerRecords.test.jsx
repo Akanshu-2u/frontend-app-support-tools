@@ -57,7 +57,7 @@ describe('Learner Records Tests', () => {
       .spyOn(api, 'getLearnerRecords')
       .mockImplementationOnce(() => Promise.resolve(expectedError));
     const { container, unmount } = render(<LearnerRecordsWrapper username={data.username} />);
-    waitFor(() => expect(container.querySelector('.alert').textContent).toEqual(expectedError.errors[0].text));
+    await waitFor(() => expect(container.querySelector('.alert').textContent).toEqual(expectedError.errors[0].text));
     unmount();
   });
 
@@ -190,5 +190,56 @@ describe('Learner Records Tests', () => {
   it('renders without username', () => {
     const { container } = render(<LearnerRecordsWrapper username="" />);
     expect(container.querySelector('h3').textContent).toEqual('Learner Records');
+  });
+
+  it('renders component when records array is empty after API call', async () => {
+    apiMock = jest
+      .spyOn(api, 'getLearnerRecords')
+      .mockImplementationOnce(() => Promise.resolve([]));
+
+    const { container, unmount } = render(<LearnerRecordsWrapper username={data.username} />);
+
+    // Wait for component to process the empty array response
+    await waitFor(() => {
+      expect(apiMock).toHaveBeenCalledWith(data.username);
+    });
+
+    // Verify header is present
+    expect(container.querySelector('h3').textContent).toEqual('Learner Records');
+
+    unmount();
+  });
+
+  it('renders multiple program records with alternating background colors', async () => {
+    const multipleRecords = JSON.parse(JSON.stringify(records));
+    // Create a second record by duplicating the first
+    multipleRecords.push({
+      ...multipleRecords[0],
+      uuid: 'different-uuid-for-second-record',
+      record: {
+        ...multipleRecords[0].record,
+        program: {
+          ...multipleRecords[0].record.program,
+          name: 'Second Program',
+        },
+      },
+    });
+
+    apiMock = jest
+      .spyOn(api, 'getLearnerRecords')
+      .mockImplementationOnce(() => Promise.resolve(multipleRecords));
+
+    const { unmount } = render(<LearnerRecordsWrapper username={data.username} />);
+
+    // Wait for records to render
+    const programInfoSections = await screen.findAllByTestId('learner-records-program-information');
+    expect(programInfoSections).toHaveLength(2);
+
+    // Verify alternating background colors are applied
+    const sections = document.querySelectorAll('section.p-4');
+    expect(sections[0].className).toContain('bg-light-200'); // idx % 2 = 0 (even)
+    expect(sections[1].className).toContain('bg-light-100'); // idx % 2 = 1 (odd)
+
+    unmount();
   });
 });

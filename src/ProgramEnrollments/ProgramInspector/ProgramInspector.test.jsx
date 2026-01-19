@@ -307,4 +307,38 @@ describe('Program Inspector', () => {
     });
     unmount();
   });
+
+  it('renders SSO records successfully when records exist', async () => {
+    apiMock = jest
+      .spyOn(api, 'getProgramEnrollmentsInspector')
+      .mockImplementation(() => Promise.resolve(programInspectorSuccessResponse));
+
+    const { unmount } = render(<ProgramEnrollmentsWrapper />);
+
+    fireEvent.change(document.querySelector("input[name='username']"), { target: { value: data.username } });
+    fireEvent.change(document.querySelector("select[name='orgKey']"), { target: { value: data.orgKey } });
+    fireEvent.click(document.querySelector('button.btn-primary'));
+
+    await waitFor(() => {
+      expect(mockedNavigator).toHaveBeenCalledWith(
+        `?edx_user_id=${UserSummaryData.userData.id}`,
+      );
+    });
+
+    // Wait for SSO records to load and verify
+    await waitFor(() => {
+      expect(ssoMock).toHaveBeenCalled();
+    }, { timeout: 5000 });
+
+    // Give time for state updates to complete
+    await waitFor(() => {
+      const ssoRecordsContainer = screen.getByTestId('sso-records');
+      expect(ssoRecordsContainer).toBeInTheDocument();
+      // Check that SSO card content is present (not the error message)
+      const notFoundAlert = screen.queryByText('SSO Record Not Found');
+      expect(notFoundAlert).not.toBeInTheDocument();
+    }, { timeout: 5000 });
+
+    unmount();
+  });
 });
