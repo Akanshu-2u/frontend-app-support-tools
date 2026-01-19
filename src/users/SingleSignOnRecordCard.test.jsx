@@ -7,12 +7,6 @@ import ssoRecordsData from './data/test/ssoRecords';
 import SingleSignOnRecordCard from './SingleSignOnRecordCard';
 import { formatDate, formatUnixTimestamp } from '../utils';
 
-const SingleSignOnRecordCardWrapper = (props) => (
-  <IntlProvider locale="en">
-    <SingleSignOnRecordCard {...props} />
-  </IntlProvider>
-);
-
 describe.each(ssoRecordsData)('Single Sign On Record Card', (ssoRecordData) => {
   // prepare data
   const ssoRecordProp = camelCaseObject({

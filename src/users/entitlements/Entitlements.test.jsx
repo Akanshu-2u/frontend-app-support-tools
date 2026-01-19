@@ -27,7 +27,6 @@ jest.mock('@edx/frontend-platform', () => ({
 
 describe('Entitlements Listing', () => {
   let apiMock;
-  let wrapper;
   let unmountComponent;
   const props = {
     user: 'edX',
@@ -36,9 +35,8 @@ describe('Entitlements Listing', () => {
 
   beforeEach(async () => {
     apiMock = jest.spyOn(api, 'getEntitlements').mockImplementationOnce(() => Promise.resolve(entitlementsData));
-    const { unmount, container } = render(<EntitlementsPageWrapper {...props} />);
+    const { unmount } = render(<EntitlementsPageWrapper {...props} />);
     unmountComponent = unmount;
-    wrapper = container;
   });
 
   afterEach(() => {
@@ -142,9 +140,7 @@ describe('Entitlements Listing', () => {
     // Wait for the component to render and find the order number link
     await waitFor(async () => {
       const orderLinks = screen.getAllByRole('link');
-      const orderLink = orderLinks.find(link => 
-        link.href && link.href.includes('/dashboard/orders/')
-      );
+      const orderLink = orderLinks.find(link => link.href && link.href.includes('/dashboard/orders/'));
       expect(orderLink).toBeTruthy();
       // Fix the regex to match the actual URL (without "789" at the end)
       expect(orderLink.href).toMatch(/http:\/\/example\.com\/dashboard\/orders\/123edX456/);
@@ -169,36 +165,36 @@ describe('Entitlements Listing', () => {
       // We're checking row 1 of the table since the expire button should be enabled
       const dataTable = await screen.findByTestId('entitlements-data-table');
       const dataRows = dataTable.querySelectorAll('tbody tr');
-      
-      // Find a row where the expire button should be enabled
-      for (let i = 0; i < dataRows.length; i++) {
-        const dropdownButton = dataRows[i].querySelector('.dropdown button');
-        if (dropdownButton) {
-          await act(async () => {
-            fireEvent.click(dropdownButton);
-          });
-          
-          const expireOption = dataRows[i].querySelectorAll('.dropdown-menu.show a')[1];
-          if (expireOption && expireOption.textContent === 'Expire' && !expireOption.outerHTML.includes('disabled')) {
-            await act(async () => {
-              fireEvent.click(expireOption);
-            });
 
-            let expireFormModal = await screen.findByTestId('expire-entitlement-form');
-            expect(expireFormModal).toBeInTheDocument();
-            const title = await screen.findByTestId('expire-entitlement-modal-title');
-            expect(title.textContent).toEqual('Expire Entitlement');
-            const closeButton = await screen.findByTestId('expire-entitlement-modal-close-button');
-            
-            await act(async () => {
-              fireEvent.click(closeButton);
-            });
-            
-            expireFormModal = await screen.queryByTestId('expire-entitlement-form');
-            expect(expireFormModal).not.toBeInTheDocument();
-            break;
-          }
+      // Find a row where the expire button should be enabled
+      const enabledRow = Array.from(dataRows).find((row) => {
+        const dropdownButton = row.querySelector('.dropdown button');
+        if (dropdownButton) {
+          fireEvent.click(dropdownButton);
+          const expireOption = row.querySelectorAll('.dropdown-menu.show a')[1];
+          return expireOption && expireOption.textContent === 'Expire' && !expireOption.outerHTML.includes('disabled');
         }
+        return false;
+      });
+
+      if (enabledRow) {
+        const expireOption = enabledRow.querySelectorAll('.dropdown-menu.show a')[1];
+        await act(async () => {
+          fireEvent.click(expireOption);
+        });
+
+        let expireFormModal = await screen.findByTestId('expire-entitlement-form');
+        expect(expireFormModal).toBeInTheDocument();
+        const title = await screen.findByTestId('expire-entitlement-modal-title');
+        expect(title.textContent).toEqual('Expire Entitlement');
+        const closeButton = await screen.findByTestId('expire-entitlement-modal-close-button');
+
+        await act(async () => {
+          fireEvent.click(closeButton);
+        });
+
+        expireFormModal = await screen.queryByTestId('expire-entitlement-form');
+        expect(expireFormModal).not.toBeInTheDocument();
       }
     });
   });

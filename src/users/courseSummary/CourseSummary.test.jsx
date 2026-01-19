@@ -87,24 +87,24 @@ describe('Course Summary', () => {
         },
       ],
     }));
-    
+
     let unmount;
     await act(async () => {
       const renderResult = render(<CourseSummaryWrapper {...props} />);
       unmount = renderResult.unmount;
     });
-    
+
     await waitFor(() => {
       const title = screen.getByTestId('course-summary-modal-title');
       expect(title.textContent).toEqual('Course Summary');
     });
-    
+
     // Wait for error message to appear
     await waitFor(() => {
       const alert = screen.getByRole('alert');
       expect(alert).toHaveTextContent('No Course Summary Data found');
     });
-    
+
     unmount();
   });
 });

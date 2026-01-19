@@ -65,7 +65,7 @@ describe('Enrollment Change form', () => {
       });
 
       expect(screen.queryByTestId('spinner')).not.toBeInTheDocument();
-      let submitButton = document.querySelector('button.btn-primary');
+      const submitButton = document.querySelector('button.btn-primary');
 
       await act(async () => {
         fireEvent.click(submitButton);
