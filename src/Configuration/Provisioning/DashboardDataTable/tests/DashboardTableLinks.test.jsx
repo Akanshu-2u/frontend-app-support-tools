@@ -38,7 +38,7 @@ describe('DashboardTableLinks', () => {
 
     it('does not render hyperlink if FEATURE_CONFIGURATION_EDIT_ENTERPRISE_PROVISION is false', () => {
       getConfig.mockReturnValue({ FEATURE_CONFIGURATION_EDIT_ENTERPRISE_PROVISION: false });
-      render(<PlanIdHyperlink row={row} />);
+      render(<IntlProvider locale="en"><PlanIdHyperlink row={row} /></IntlProvider>);
       expect(screen.queryByRole('link', { name: '123456789' })).toBeNull();
     });
   });
@@ -58,7 +58,7 @@ describe('DashboardTableLinks', () => {
 
     it('does not render hyperlink if FEATURE_CONFIGURATION_EDIT_ENTERPRISE_PROVISION is false', () => {
       getConfig.mockReturnValue({ FEATURE_CONFIGURATION_EDIT_ENTERPRISE_PROVISION: false });
-      render(<PlanTitleHyperlink row={row} />);
+      render(<IntlProvider locale="en"><PlanTitleHyperlink row={row} /></IntlProvider>);
       expect(screen.queryByRole('link', { name: 'Pikachu' })).toBeNull();
     });
   });
@@ -78,7 +78,7 @@ describe('DashboardTableLinks', () => {
 
     it('does not render hyperlink if FEATURE_CONFIGURATION_EDIT_ENTERPRISE_PROVISION is false', () => {
       getConfig.mockReturnValue({ FEATURE_CONFIGURATION_EDIT_ENTERPRISE_PROVISION: false });
-      render(<CustomerNameHyperlink row={row} />);
+      render(<IntlProvider locale="en"><CustomerNameHyperlink row={row} /></IntlProvider>);
       expect(screen.queryByRole('link', { name: 'Ash Ketchum' })).toBeNull();
     });
   });

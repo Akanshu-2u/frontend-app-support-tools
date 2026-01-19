@@ -11,9 +11,11 @@ import UserMessagesProvider from '../../userMessages/UserMessagesProvider';
 jest.mock('../data/api');
 
 const OrderHistoryWrapper = (props) => (
-  <UserMessagesProvider>
-    <OrderHistory {...props} />
-  </UserMessagesProvider>
+  <IntlProvider locale="en">
+    <UserMessagesProvider>
+      <OrderHistory {...props} />
+    </UserMessagesProvider>
+  </IntlProvider>
 );
 
 describe('OrderHistory', () => {

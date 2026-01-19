@@ -13,13 +13,17 @@ exports[`User Search Page renders correctly matches snapshot 1`] = `
       >
         Username, Email or LMS User ID
       </label>
-      <input
-        class="form-control flex-grow-1 ml-1 mr-1"
-        data-testid="userSearchInput"
-        name="userIdentifier"
-        type="text"
-        value=""
-      />
+      <div
+        class="pgn__form-control-decorator-group flex-grow-1 ml-1 mr-1"
+      >
+        <input
+          class="form-control"
+          data-testid="userSearchInput"
+          name="userIdentifier"
+          type="text"
+          value=""
+        />
+      </div>
       <button
         class="btn btn-primary"
         data-testid="userSearchSubmitButton"

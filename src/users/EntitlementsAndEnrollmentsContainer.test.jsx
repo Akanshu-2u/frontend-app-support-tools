@@ -31,7 +31,9 @@ describe('Entitlements and Enrollments component', () => {
   });
 
   afterEach(() => {
-    unmountWrapper();
+    if (unmountWrapper) {
+      unmountWrapper();
+    }
   });
 
   it('renders correctly', async () => {
