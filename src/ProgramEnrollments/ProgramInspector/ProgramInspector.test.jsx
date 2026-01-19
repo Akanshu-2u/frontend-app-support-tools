@@ -235,4 +235,76 @@ describe('Program Inspector', () => {
     expect(screen.getByText('SSO Record Not Found')).toBeInTheDocument();
     unmount();
   });
+
+  it('renders enrollment details when learner has enrollments', async () => {
+    apiMock = jest
+      .spyOn(api, 'getProgramEnrollmentsInspector')
+      .mockImplementation(() => Promise.resolve(programInspectorSuccessResponse));
+
+    const { unmount } = render(<ProgramEnrollmentsWrapper />);
+
+    fireEvent.change(document.querySelector("input[name='username']"), { target: { value: data.username } });
+    fireEvent.change(document.querySelector("select[name='orgKey']"), { target: { value: data.orgKey } });
+    fireEvent.click(document.querySelector('button.btn-primary'));
+
+    await waitFor(() => {
+      const enrollmentSection = document.querySelector('.enrollments');
+      expect(enrollmentSection).not.toBeNull();
+    }, { timeout: 3000 });
+    unmount();
+  });
+
+  it('handles form input changes correctly', async () => {
+    // Mock API to return Promise for the initial call triggered by URL parameter
+    apiMock = jest
+      .spyOn(api, 'getProgramEnrollmentsInspector')
+      .mockImplementation(() => Promise.resolve(programInspectorSuccessResponse));
+
+    const { unmount } = render(<ProgramEnrollmentsWrapper />);
+
+    await waitFor(() => {
+      const usernameInput = document.querySelector("input[name='username']");
+      expect(usernameInput).not.toBeNull();
+    });
+
+    const usernameInput = document.querySelector("input[name='username']");
+    const externalKeyInput = document.querySelector("input[name='externalKey']");
+
+    fireEvent.change(usernameInput, { target: { value: 'testuser' } });
+    fireEvent.change(externalKeyInput, { target: { value: 'external123' } });
+
+    expect(usernameInput.value).toBe('testuser');
+    expect(externalKeyInput.value).toBe('external123');
+    unmount();
+  });
+
+  it('renders error alert when error response is received', async () => {
+    apiMock = jest
+      .spyOn(api, 'getProgramEnrollmentsInspector')
+      .mockImplementation(() => Promise.resolve(programInspectorErrorResponse));
+
+    const { unmount } = render(<ProgramEnrollmentsWrapper />);
+
+    fireEvent.change(document.querySelector("input[name='username']"), { target: { value: data.username } });
+    fireEvent.click(document.querySelector('button.btn-primary'));
+
+    await waitFor(() => {
+      const alerts = document.querySelectorAll('.alert-danger');
+      expect(alerts.length).toBeGreaterThan(0);
+    });
+    unmount();
+  });
+
+  it('clears form when search is submitted without any input', async () => {
+    const { unmount } = render(<ProgramEnrollmentsWrapper />);
+
+    fireEvent.change(document.querySelector("input[name='username']"), { target: { value: '' } });
+    fireEvent.change(document.querySelector("input[name='externalKey']"), { target: { value: '' } });
+    fireEvent.click(document.querySelector('button.btn-primary'));
+
+    await waitFor(() => {
+      expect(mockedNavigator).toHaveBeenCalledWith('/programs');
+    });
+    unmount();
+  });
 });

@@ -138,4 +138,57 @@ describe('Learner Records Tests', () => {
     expect(firstDataRow.querySelectorAll('td')[6].textContent).toEqual(new Date(grade.issue_date).toLocaleDateString());
     expect(firstDataRow.querySelectorAll('td')[7].textContent).toEqual('Earned');
   });
+
+  it('renders status as "Earned" for completed program', async () => {
+    const completedRecords = JSON.parse(JSON.stringify(records));
+    completedRecords[0].record.program.completed = true;
+    completedRecords[0].record.program.empty = false;
+
+    apiMock = jest
+      .spyOn(api, 'getLearnerRecords')
+      .mockImplementationOnce(() => Promise.resolve(completedRecords));
+
+    const { unmount } = render(<LearnerRecordsWrapper username={data.username} />);
+    const programInformation = await screen.findByTestId('learner-records-program-information');
+    expect(programInformation.querySelectorAll('p')[1].textContent).toEqual('Earned');
+    unmount();
+  });
+
+  it('renders status as "Not Earned" for empty program', async () => {
+    const emptyRecords = JSON.parse(JSON.stringify(records));
+    emptyRecords[0].record.program.completed = false;
+    emptyRecords[0].record.program.empty = true;
+
+    apiMock = jest
+      .spyOn(api, 'getLearnerRecords')
+      .mockImplementationOnce(() => Promise.resolve(emptyRecords));
+
+    const { unmount } = render(<LearnerRecordsWrapper username={data.username} />);
+    const programInformation = await screen.findByTestId('learner-records-program-information');
+    expect(programInformation.querySelectorAll('p')[1].textContent).toEqual('Not Earned');
+    unmount();
+  });
+
+  it('renders course data without issue date as Not Earned', async () => {
+    const recordsWithoutDate = JSON.parse(JSON.stringify(records));
+    recordsWithoutDate[0].record.grades[0].issue_date = null;
+
+    apiMock = jest
+      .spyOn(api, 'getLearnerRecords')
+      .mockImplementationOnce(() => Promise.resolve(recordsWithoutDate));
+
+    const { unmount } = render(<LearnerRecordsWrapper username={data.username} />);
+    const dataTable = await screen.findByTestId('learner-records-table');
+    const firstDataRow = dataTable.querySelectorAll('tr')[1];
+
+    expect(firstDataRow.querySelectorAll('td')[3].textContent).toEqual('');
+    expect(firstDataRow.querySelectorAll('td')[6].textContent).toEqual('');
+    expect(firstDataRow.querySelectorAll('td')[7].textContent).toEqual('Not Earned');
+    unmount();
+  });
+
+  it('renders without username', () => {
+    const { container } = render(<LearnerRecordsWrapper username="" />);
+    expect(container.querySelector('h3').textContent).toEqual('Learner Records');
+  });
 });
